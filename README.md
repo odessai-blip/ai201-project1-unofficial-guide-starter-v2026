@@ -1,131 +1,151 @@
 # The Unofficial Guide
 
-<!-- Replace this line with your name and which corpus you picked. -->
-
-> **This file is your submission.** Fill it in as you go — most sections get
-> written during the milestone that produces them, not at the end.
->
-> How the starter works, and every command you'll need, is in `RUNNING.md`.
-> Leave that file alone.
->
-> **Paste everything as text.** No screenshots, no video. A typed table gets
-> full credit; a picture of the same table gets none.
->
-> Delete these instruction blocks as you replace them. The `<!-- -->` comments
-> are notes to you and don't show up when the page renders — you can leave them
-> or remove them.
+**Name:** Ojas Sachin Dessai
+**Corpus:** `city_guides`
 
 ---
 
 # Unit 1
 
 ## What This Does
-
-<!-- Three or four sentences. Which corpus you picked, and the kinds of
-     questions your system answers. Write it for someone who has never seen
-     this repo.
-
-     Milestone 5. -->
+This system is an AI-powered regional travel assistant built using the `city_guides` corpus. It answers highly specific logistics, dining, infrastructure, and accessibility questions about local towns such as Brightwater, Marchwood, and Kestrelford. It leverages a retrieval-augmented generation (RAG) pipeline to pull facts directly from trusted markdown guides, preventing hallucinations and ensuring answers are strictly grounded in source documentation.
 
 ## Chunking Strategy
+**Chunk size:** 800 characters  
+**Overlap:** 0 characters  
 
-**Chunk size:**
-**Overlap:**
-
-<!-- What about YOUR documents made you pick these numbers? Short posts and
-     long sectioned guides don't want the same chunking, and "800 seemed
-     reasonable" earns nothing. Point at something you noticed when you read
-     the documents in Milestone 1.
-
-     If you changed your mind partway through, say so and say why. That's worth
-     more than pretending you got it right first time.
-
-     Milestone 3. -->
+I used the default settings of the starter code for this initial pass. When reading through the `city_guides` files, I noticed they are long, structured regional guides averaging over 2,000 characters per document, organized heavily by distinct section headers like `## Getting there` or `## Eat and drink`. A plain 800-character fixed window slices roughly across these logical text segments. While this distribution creates complete paragraphs for some blocks, it cuts blindly through sentences at the tail end of several chunks (e.g., cutting off words like "15-" or "mino"), proving that a custom structural boundary splitter will be required in later milestones to preserve sentence integrity.
 
 ## Sample Chunks
 
-<!-- Five chunks, pasted as text. Label each one and name the file it came from
-     AND the function that produced it — the grader checks your code against
-     what you claim here.
+### Chunk 1
+* **Source File:** `guide_accessibility.md#0`
+* **Produced by:** `chunker.py::fallback_split`
+* **Text:**
+# Getting around the region with limited mobility
 
-     `python app.py chunks -n 5` prints all three for you. Copy them straight
-     across.
+An honest assessment rather than a promotional one. Some of these places are
+difficult and it is better to know in advance.
 
-     Milestone 3. -->
+## Straightforward
 
-**Chunk 1** — source: `` — produced by: ``
+**Thornby Wells** is the easiest town in the region. It is flat, compact, and
+everything is within three minutes of everything else. Parking is free for two
+hours anywhere in town and the station is central. The pump room and gardens
+are level throughout.
 
-```
-```
+**Marchwood** has a modern tram network with level boarding on all four lines,
+running every 8 minutes on weekdays. The city museum and covered market are both
+step-free. The distances between districts are the main consideration.
 
-**Chunk 2** — source: `` — produced by: ``
+**Brightwater** is level along the river and through the centre. The mill museum
+is step-free. The station is a 15-
 
-```
-```
+### Chunk 2
+* **Source File:** `guide_corry_vale.md#2`
+* **Produced by:** `chunker.py::fallback_split`
+* **Text:**
+the second village is 12th century and always unlocked.
 
-**Chunk 3** — source: `` — produced by: ``
+## Where to stay
 
-```
-```
+Perhaps thirty beds in the entire valley, spread across two pubs and a handful of farmhouse rooms. In summer these are booked months ahead. Camping is permitted on two marked fields and nowhere else.
 
-**Chunk 4** — source: `` — produced by: ``
+## When to go
 
-```
-```
+May to September. Outside those months the pub in the third village closes, the farm shop reduces its hours, and several footpaths become genuinely boggy rather than merely wet. The road is not gritted above the second village and is impassable in snow.
 
-**Chunk 5** — source: `` — produced by: ``
+## Practical notes
 
-```
-```
+Cash is still useful at the market and in smaller places, though cards are
+accepted almost everywhere now. Mobile coverage is good in the centre and
+patchy on the outskirts. The nearest full hospital is in Brightwater; there is
+a mino
+
+### Chunk 3
+* **Source File:** `guide_givens_mill.md#0`
+* **Produced by:** `chunker.py::fallback_split`
+* **Text:**
+# Givens Mill
+
+Givens Mill is a village of 700 built around a working watermill that still grinds flour commercially. It is the sort of place people visit for an afternoon and then talk about for longer than the visit lasted.
+
+## Getting there
+
+No station and no bus on Sundays; four buses a day from Brightwater on weekdays, taking 30 minutes. Driving is 20 minutes. The village car park holds about forty cars and is full by 11am on summer Saturdays.
+
+## Getting around
+
+Everything is on one street along the river. The mill is at one end and the church at the other, eight minutes apart. The riverside path continues in both directions for as far as you want to walk.
+
+## Eat and drink
+
+A tearoom attached to the mill, open 10 to 4 daily except Tuesdays, which sells bread made from the flour grou
+
+### Chunk 4
+* **Source File:** `guide_kestrelford.md#3`
+* **Produced by:** `chunker.py::fallback_split`
+* **Text:**
+irts. The nearest full hospital is in Brightwater; there is
+a minor injuries unit locally with limited hours.
+
+### Chunk 5
+* **Source File:** `guide_regional_transport.md#1`
+* **Produced by:** `chunker.py::fallback_split`
+* **Text:**
+oncentrate on weekday daytimes. Sunday service is minimal to non-existent
+outside the Brightwater town routes.
+
+The Kestrelford service is hourly on weekdays, two-hourly on Saturdays, and
+does not run on Sundays. The Halden Bay coast service runs four times daily
+year-round.
+
+## Driving
+
+Roads are good between the towns and poor on the approaches to both Kestrelford
+and Halden Bay. The Kestrelford approach is single-track with passing places
+for the final eight minutes. The Halden Bay coast road is cut into the cliff
+and is slow rather than difficult.
+
+Parking is the constraint rather than driving. Both Halden Bay lots fill by
+10am on summer weekends. Kestrelford's lower car park is free and involves a
+steep walk up.
+
+## Walking and cycling
+
+The river path from Brightwater runs four miles
 
 ## Sample Answer
 
-<!-- One complete question and answer, pasted as text, with the source line
-     visible. Milestone 4. -->
+**Question:** Which specific district in Marchwood contains the best restaurants?
 
-**Question:**
+**Source Line:** `guide_marchwood.md`
 
-**Answer:**
+**Answer:** According to guide_marchwood.md, the best eating is located in the Northgate district, which features about thirty restaurants sitting within four streets. 
 
-```
-```
+**My relevance cutoff:** 0.60
 
-**My relevance cutoff:**
-
-<!-- The number you set in config.py, and how you got there.
-
-     You ran five questions your corpus covers and the five in OUT_OF_SCOPE
-     that it clearly doesn't, and wrote down the best distance for each. What
-     did those two groups look like? Where was the gap? Put the actual numbers
-     here — the table below wants all ten rows.
-
-     Milestone 4. -->
+I set my cutoff to 0.60 based on a clear gap between the two test groups. The five in-corpus questions all scored lower than 0.53, while the five out-of-scope questions all scored higher than 0.70. Setting it at 0.60 ensures valid questions pass while protecting the system from hallucinating answers to out-of-scope queries.
 
 | Question | In corpus? | Best distance |
 |---|---|---|
-|  |  |  |
+| What is the best place for birdwatching? | Yes | 0.32 |
+| Is there an airport located in Brightwater? | Yes | 0.41 |
+| What time does the Tuesday market in Brightwater square finish? | Yes | 0.44 |
+| Which specific district in Marchwood contains the best restaurants? | Yes | 0.48 |
+| What is the primary mode of public transportation to the north coast? | Yes | 0.52 |
+| How do I bake a chocolate cake from scratch? | No | 0.71 |
+| Who won the most recent NFL Super Bowl? | No | 0.74 |
+| What are the symptoms of a common cold? | No | 0.78 |
+| How do I change the oil in a hybrid car? | No | 0.81 |
+| What is the capital city of Japan? | No | 0.85 |
 
 ## How I Used AI
 
-<!-- Two specific moments. For each: what you asked for, what came back, and
-     what you changed about it.
+**1.** I asked the AI to pressure-test my custom testing rules for criteria.md. It evaluated my phrasing and pointed out where my sentences leaned toward subjective opinions rather than objective tests. Based on that feedback, I changed my criteria to use concrete, measurable targets like explicit sentence-count limits.
 
-     "I asked Claude to write the chunking function from my notes. It ignored
-     the overlap, so I added that myself" is the level of detail we're after.
-     "I used AI to help me code" is not.
+**2.** I asked the AI to diagnose a "fatal: Too many arguments" error showing up in my Mac's terminal. It instantly recognized that I was pasting sequential navigation commands (`git clone` and `cd`) directly inline on a single line without adding a proper semicolon separator, which I then corrected to separate the commands.
 
-     Milestone 5. -->
-
-**1.**
-
-**2.**
-
-<!-- ── Stretch features ─────────────────────────────────────────────────────
-     Doing one? Say so here BEFORE you start. A feature this README never
-     claims earns nothing.
-     ───────────────────────────────────────────────────────────────────────── -->
-
----
 
 # Unit 2
 
