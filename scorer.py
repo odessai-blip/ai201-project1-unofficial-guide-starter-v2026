@@ -1,2 +1,1 @@
-def judge(question,expects,answer,results):
-  
+judge(question, expects, answer, results) -> bool:  
