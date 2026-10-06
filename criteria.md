@@ -23,8 +23,9 @@ For at least 4 of my 5 test questions, the retrieved chunks include one that
 contains the answer.
 
 **Why this target:**
-<!-- e.g. "One of my questions is about a topic only two documents mention, so
-     I expect that one to be hard." -->
+The guides are organised by heading, so most answers sit in a single section.
+I allowed one miss because some of my questions name one town while the
+relevant chunk covers several towns, which may match more weakly.
 
 ---
 
@@ -33,8 +34,9 @@ contains the answer.
 Every answer the system produces names at least one source document.
 
 **Why this target:**
-<!-- Why all five and not four? What about your setup makes that achievable —
-     or what would have to go wrong for it not to be? -->
+All five, not four, because the grounding instruction already tells the model
+to name the file, and an answer with no source can't be checked. If it fails,
+the instruction isn't being followed.
 
 ---
 
@@ -50,32 +52,41 @@ in at least 4 of 5 tries.
      just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
 
 **Why this target:**
-<!-- What did your distances look like when you set the cutoff in Milestone 4?
-     Was there a clean gap, or did the two groups overlap? -->
+When I set the 0.60 cutoff, my in-corpus questions scored 0.53 or lower and
+my out-of-scope ones scored 0.70 or higher, a clear gap. I picked 4 of 5
+rather than 5 of 5 because new chunking shifts the distances and one borderline
+question could slip through.
+
 
 ---
 
 ## 4. Something about your chunks
 
- At least 4 out of 5 retrieved text chunks contain complete, unbroken sentences rather than cutting off mid-phrase.
- 
+At least 4 out of 5 chunks printed by `python app.py chunks -n 5` contain
+complete, unbroken sentences rather than cutting off mid-phrase. 
 
 
 
 **Why this target:**
-I chose 4 out of 5 because some documents use short bullet-point formatting which might naturally fragment when parsed into raw chunks, but the majority should remain legible sentences.
+I chose 4 out of 5 because some documents use short bullet-point formatting
+which might naturally fragment when parsed into raw chunks, but the majority
+should remain legible sentences.
 
 
 ---
 
 ## 5. Your choice
 
-For all 5 test questions, the AI's generated response must be under 3 sentences long to ensure answers stay concise.
-
+For at least 4 of my 5 test questions, the AI's generated response is at most
+3 sentences long, not counting the source line.
 
 
 **Why this target:**
-The source files are highly compressed travel guides, so any accurate answer should be able to state its core facts quickly without generating irrelevant background text.
+The source files are highly compressed travel guides, so any accurate answer
+should be able to state its core facts quickly without generating irrelevant
+background text. I allow one miss because a question that spans several towns
+may need a longer answer, and I don't count the source line so that citing
+doesn't use up the limit.
 
 
 ---
