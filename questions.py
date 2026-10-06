@@ -22,10 +22,9 @@ names a target of "4 of 5", and four of three is not a thing.
 """
 
 QUESTIONS = [
-    # {"question": "...", "expects": "..."},
-    {"question": "What is the best place for birdwatching?", "expects": "Elder Ness"},
-    {"question": "Can you get to Brightwater via airport?", "expects": "No, too far away"},
-    {"question": "How much does it cost per year to rent a locker at the Marchwood student centre lounge?", "expects": "not in documents"},
+    {"question": "Where in the region should I go for birdwatching?", "expects": "Elder Ness"},
+    {"question": "What time does the farm shop in Corry Vale close?", "expects": "4pm"},
+    {"question": "On which day is the only shop in Elder Ness closed?", "expects": "Sunday"},
     {"question": "What time does the Tuesday market in Brightwater square finish?", "expects": "1pm"},
     {"question": "Which specific district in Marchwood contains the best restaurants?", "expects": "Northgate"},
 ]
