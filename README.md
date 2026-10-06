@@ -239,8 +239,10 @@ Gate (`run_eval.py::check_out_of_scope`): refused 5 of 5, distances 0.846 to 0.9
 ## The Improvement
 
 **What I changed:**
+I added BM25 keyword search (using `rank-bm25`) alongside the semantic search in `store.py::search`, and merged the two ranked lists with reciprocal rank fusion. The relevance gate still uses the semantic distance with the same 0.60 cutoff, so BM25 only affects which chunks reach the model. I changed nothing else: same chunker, same top-k, same questions.
 
 **Why I picked it:**
+My closest call in the before run was birdwatching, with a best distance of 0.553 against the 0.60 cutoff. The Elder Ness guide says "bird observatory" rather than "birdwatching", so keyword matching should help that chunk rank higher without relying only on meaning.
 
 <!-- Connect it to a specific diagnosis above in one sentence. If you can't,
      you picked a fix because it sounded impressive. -->
@@ -252,12 +254,13 @@ Gate (`run_eval.py::check_out_of_scope`): refused 5 of 5, distances 0.846 to 0.9
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 4. Chunks complete, unbroken sentences | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 5. Answers under 3 sentences | all 5 | 5/5 | 5/5 | 5/5 | MET |
 
+Evidence: `results/run_2026-10-06_0241_after.md` (produced by `run_eval.py::main`, retrieval from `store.py::search` with BM25 hybrid search).
 **Did it help?**
 
 <!-- Say plainly whether it did, and how you know. If it made things worse,
@@ -266,7 +269,7 @@ Gate (`run_eval.py::check_out_of_scope`): refused 5 of 5, distances 0.846 to 0.9
      tell.
 
      Milestone 4. -->
-
+No measurable improvement. All five criteria were 5/5 before and after, and the best distances were identical because the relevance gate still reads the semantic distance and BM25 only changes which chunks reach the model. The retrieved sets did change: for three of five questions BM25 added a guide that wasn't needed (`guide_marchwood.md` for birdwatching, `guide_regional_transport.md` for the Brightwater market, `guide_thornby_wells.md` for the Marchwood restaurants question), so retrieval got slightly noisier, not better. The answers stayed correct because the right chunk was already in the top results. The birdwatching margin (0.553 against the 0.60 cutoff) is unchanged, so this change did not address the weak spot I diagnosed. Hybrid search is aimed at questions where semantic search misses exact terms, and my questions didn't have that problem.
 ## What's Still Broken
 
 <!-- For each criterion still missed after your fix: what you'd do about it,
@@ -276,9 +279,9 @@ Gate (`run_eval.py::check_out_of_scope`): refused 5 of 5, distances 0.846 to 0.9
      not.
 
      Milestone 5. -->
-
+Nothing missed a target, but two problems remain. The birdwatching margin is unchanged (best distance 0.553 against the 0.60 cutoff, only 0.047 of headroom), so a rephrased question could be wrongly refused. I stopped because hybrid search doesn't touch the gate, and tuning the cutoff would have been a second change. Also, hybrid search added unneeded guides to three questions' retrieved sets, so I would not keep it as it stands.
 ## What I'd Do Differently
-
+I would tighten criterion 4 to 5 of 5 and require that each chunk can answer a question on its own, because my section-based chunker made 4 of 5 almost guaranteed. I would replace criterion 5 (answers under 3 sentences) with an accuracy check against the `expects` phrases, since brevity says little about quality. I would also define "under 3 sentences" precisely, including whether the source line counts.
 <!-- Knowing what you know now — which of your five criteria would you write
      differently, and why?
 
