@@ -21,9 +21,8 @@ If you get stuck for 30 minutes, `fallback_split` is the original. Switch back
 to it, write down what you saw, and move on. That's a real observation about
 your pipeline, not giving up.
 """
-
+import re
 from dataclasses import dataclass
-
 import config
 from ingest import Document
 
@@ -82,23 +81,80 @@ def fallback_split(
 
 def split_documents(documents: list[Document]) -> list[Chunk]:
     """
-    Split documents into chunks. ⚠️ REPLACE THE BODY OF THIS IN MILESTONE 3.
-
-    Right now it just calls the fallback. That is the plain, generic behaviour
-    the brief is talking about.
-
-    When you write your own strategy, set `produced_by` to
-    "chunker.py::split_documents" so your README's Sample Chunks section names
-    the right function. `app.py chunks` prints that string for you.
-
-    Things worth thinking about before you write any code:
-      - Are your documents short posts or long guides?
-      - Is the useful information in one sentence, or spread over a paragraph?
-      - Would splitting on paragraph breaks keep more thoughts intact than
-        splitting on a character count?
+    Split each document on its "## " section headings. Every chunk is one
+    section, prefixed with the document title so it makes sense on its own.
+    Very short sections are merged into the previous chunk; very long ones
+    are split on paragraph breaks with a small overlap.
     """
-    return fallback_split(documents)
+    MAX_CHARS = 1000
+    MIN_CHARS = 100
+    OVERLAP = 100
 
+    chunks: list[Chunk] = []
+
+    for doc in documents:
+        text = doc.text.strip()
+
+        # Document title: the line starting with "# "
+        title_match = re.match(r"#\s+(.+)", text)
+        title = title_match.group(1).strip() if title_match else ""
+
+        # Split on "## " headings; piece 0 is the title line, so drop it
+        parts = re.split(r"(?m)^##\s+", text)[1:]
+
+        # If a document has no ## headings, keep it whole rather than lose it
+        if not parts:
+            if text:
+                chunks.append(
+                    Chunk(
+                        text=text,
+                        source=doc.source,
+                        index=0,
+                        produced_by="chunker.py::split_documents",
+                    )
+                )
+            continue
+
+        pieces: list[str] = []  # chunk texts for this document
+
+        for part in parts:
+            heading, _, body = part.partition("\n")
+            heading, body = heading.strip(), body.strip()
+            if not body:
+                continue
+
+            header = f"{title} - {heading}\n\n" if title else f"{heading}\n\n"
+
+            # Merge a very short section into the previous chunk
+            if len(body) < MIN_CHARS and pieces:
+                pieces[-1] += f"\n\n{heading}: {body}"
+                continue
+
+            if len(header) + len(body) <= MAX_CHARS:
+                pieces.append(header + body)
+            else:
+                # Long section: split on paragraphs, carry a little overlap
+                current = ""
+                for para in body.split("\n\n"):
+                    if current and len(header) + len(current) + len(para) > MAX_CHARS:
+                        pieces.append(header + current)
+                        current = current[-OVERLAP:] + "\n\n" + para
+                    else:
+                        current = f"{current}\n\n{para}" if current else para
+                if current:
+                    pieces.append(header + current)
+
+        for i, piece in enumerate(pieces):
+            chunks.append(
+                Chunk(
+                    text=piece,
+                    source=doc.source,
+                    index=i,
+                    produced_by="chunker.py::split_documents",
+                )
+            )
+
+    return chunks
 
 def describe(chunks: list[Chunk]) -> str:
     """A one-line summary, printed after indexing."""
