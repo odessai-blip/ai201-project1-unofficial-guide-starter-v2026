@@ -57,40 +57,25 @@ in at least 4 of 5 tries.
 
 ## 4. Something about your chunks
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
+ At least 4 out of 5 retrieved text chunks contain complete, unbroken sentences rather than cutting off mid-phrase.
+ 
 
 
 
 **Why this target:**
-
+I chose 4 out of 5 because some documents use short bullet-point formatting which might naturally fragment when parsed into raw chunks, but the majority should remain legible sentences.
 
 
 ---
 
 ## 5. Your choice
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
+For all 5 test questions, the AI's generated response must be under 3 sentences long to ensure answers stay concise.
 
 
 
 **Why this target:**
-
+The source files are highly compressed travel guides, so any accurate answer should be able to state its core facts quickly without generating irrelevant background text.
 
 
 ---
