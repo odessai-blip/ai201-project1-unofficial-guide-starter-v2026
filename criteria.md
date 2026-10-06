@@ -52,8 +52,8 @@ in at least 4 of 5 tries.
      just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
 
 **Why this target:**
-When I set the 0.60 cutoff, my in-corpus questions scored 0.53 or lower and
-my out-of-scope ones scored 0.70 or higher, a clear gap. I picked 4 of 5
+When I set the 0.60 cutoff, my in-corpus questions scored 0.553 or lower and
+my out-of-scope ones scored 0.846 or higher, a clear gap. I picked 4 of 5
 rather than 5 of 5 because new chunking shifts the distances and one borderline
 question could slip through.
 
