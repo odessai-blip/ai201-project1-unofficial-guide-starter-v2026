@@ -16,7 +16,7 @@ rest of the project if they were wrong:
    dimensions — but it arrives as an ONNX build from Chroma's own CDN, so the
    install needs neither PyTorch nor a reachable Hugging Face. See `_embedder`.
 """
-
+import re
 import os
 import shutil
 from dataclasses import dataclass
@@ -178,6 +178,10 @@ def build_index(
     return len(chunks)
 
 
+def _tokens(text: str) -> list[str]:
+    return re.findall(r"[a-z0-9]+", text.lower())
+
+
 def search(
     question: str,
     top_k: int | None = None,
@@ -185,10 +189,13 @@ def search(
     variant: str = "default",
 ) -> list[Result]:
     """
-    Retrieve the chunks closest in meaning to a question.
-
-    Returns them nearest-first, each with its distance.
+    Hybrid retrieval: semantic ranking + BM25 keyword ranking, merged with
+    reciprocal rank fusion. Each Result keeps its true semantic distance, and
+    the list is returned nearest-first by that distance, so the relevance gate
+    still sees the same best distance as semantic-only search.
     """
+    from rank_bm25 import BM25Okapi
+
     top_k = top_k or config.TOP_K
     name = config.collection_name(corpus, variant)
 
@@ -199,21 +206,47 @@ def search(
             f"No index called '{name}'. Run `python app.py index` first."
         ) from exc
 
+    total = collection.count()
+
+    # Semantic: distance for every chunk, nearest first
     raw = collection.query(
         query_embeddings=embed([question]),
-        n_results=min(top_k, collection.count()),
+        n_results=total,
     )
+    docs = raw["documents"][0]
+    metas = raw["metadatas"][0]
+    dists = raw["distances"][0]          # already sorted nearest-first
+    sem_rank = {i: r for r, i in enumerate(range(len(docs)))}
+
+    # BM25 over the same chunks
+    bm25 = BM25Okapi([_tokens(d) for d in docs])
+    scores = bm25.get_scores(_tokens(question))
+    bm_order = sorted(range(len(docs)), key=lambda i: scores[i], reverse=True)
+    bm_rank = {i: r for r, i in enumerate(bm_order) if scores[i] > 0}
+
+    # Reciprocal rank fusion
+    K = 60
+    fused = {}
+    for i in range(len(docs)):
+        s = 1.0 / (K + sem_rank[i])
+        if i in bm_rank:
+            s += 1.0 / (K + bm_rank[i])
+        fused[i] = s
+
+    chosen = sorted(fused, key=fused.get, reverse=True)[: min(top_k, total)]
+    if 0 not in chosen:                  # always keep the semantic best match
+        chosen[-1] = 0
+    chosen.sort(key=lambda i: dists[i])  # nearest-first by semantic distance
 
     results: list[Result] = []
-    for text, meta, distance in zip(
-        raw["documents"][0], raw["metadatas"][0], raw["distances"][0]
-    ):
+    for i in chosen:
+        meta = metas[i]
         results.append(
             Result(
-                text=text,
+                text=docs[i],
                 source=str(meta.get("source", "unknown")),
                 label=f"{meta.get('source', 'unknown')}#{meta.get('index', 0)}",
-                distance=float(distance),
+                distance=float(dists[i]),
                 produced_by=str(meta.get("produced_by", "unknown")),
             )
         )
