@@ -209,7 +209,15 @@ Gate (`run_eval.py::check_out_of_scope`): refused 5 of 5, distances 0.846 to 0.9
 | 4 | Chunks complete, unbroken | MET | All 5 chunks from `python app.py chunks -n 5` start at a section heading and end at the end of a sentence. |
 | 5 | Answers under 3 sentences | MET | Every answer was one sentence, not counting the "Source:" line. |
 ## Diagnoses
+**Nothing was missed.** All five criteria were MET on all three runs.
 
+**The one failure was in my measurement, not my system.** My first run (`results/run_2026-10-06_0218_before.md`) scored only 2 of 5. The answers were correct, but `scorer.py::judge` lowercased the `expects` phrase and not the answer, so "Elder Ness", "Sundays" and "Northgate" never matched. The two that passed ("4pm", "1pm") have no capital letters. This was a scoring bug, not a pipeline stage. I fixed it, re-ran, and got 5/5. I kept both result files as evidence.
+
+**My targets were probably too easy.**
+- Criterion 4 (chunks) was the safest. My chunker splits on section headings, so complete chunks were almost guaranteed. I would tighten it to 5 of 5, with each chunk able to answer a question on its own.
+- Criterion 5 (under 3 sentences) measures brevity, not correctness. I would replace it with a stricter accuracy check.
+
+**Closest call: birdwatching.** Its best distance was 0.553 against the 0.60 cutoff, only 0.047 of headroom. It is also a one-document topic: only `guide_elder_ness.md` mentions birds, and the guide says "bird observatory" rather than "birdwatching". A slightly different phrasing could push it past the gate and cause a wrongful refusal. That is the weakest spot, and it points at retrieval.
 <!-- For each miss: which stage caused it, and how. The stage alone isn't
      enough — you need the mechanism.
 
