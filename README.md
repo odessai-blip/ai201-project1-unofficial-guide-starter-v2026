@@ -167,15 +167,28 @@ I set my cutoff to 0.60 based on a clear gap between the two test groups. The fi
 
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 4. Chunks complete, unbroken sentences | 4 of 5 | 5/5 | 5/5 | 5/5 | MET |
+| 5. Answers under 3 sentences | all 5 | 5/5 | 5/5 | 5/5 | MET |
 
 <!-- Underneath, paste the REAL output for each criterion from one of your
      runs — the actual text your system produced, not a description of it.
      Name the file and function that produced it. -->
+**System under test:** `chunker.py::split_documents` (84 chunks). It replaced the starter's `fallback_split` after my Unit 1 write-up.
+
+**Runs:** `python run_eval.py --label before`, top-k 5, cutoff 0.6, 3 runs per question. My first run (`results/run_2026-10-06_0218_before.md`) scored 2 of 5 because of a scorer bug (the answer wasn't lowercased before matching). I fixed it and re-ran (`..._0222_before.md`). The table above uses the corrected run.
+
+**Real output** (from `run_eval.py::main`):
+
+Q: Which specific district in Marchwood contains the best restaurants?
+A: The Northgate district contains the best restaurants in Marchwood (source: `guide_marchwood.md`).
+
+Q: What time does the farm shop in Corry Vale close?
+A: The farm shop in Corry Vale closes at 4pm. Sources: `guide_corry_vale.md` and `guide_eating.md`
+
+Gate (`run_eval.py::check_out_of_scope`): refused 5 of 5, distances 0.846 to 0.997.
 
 ## Verdicts
 
@@ -190,12 +203,11 @@ I set my cutoff to 0.60 based on a clear gap between the two test groups. The fi
 
 | # | Criterion | Verdict | How I decided |
 |---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
-
+| 1 | Retrieved chunks contain the answer | MET | 5/5 on all three runs against a target of 4 of 5. I checked that "Northgate" is in the retrieved chunk text, and the right guide was retrieved for every question. |
+| 2 | Every answer names a source | MET | All 15 answers (5 questions x 3 runs) named at least one guide file. |
+| 3 | Gate stops out-of-corpus questions | MET | The gate refused 5 of 5 (best distances 0.846 to 0.997) against a target of 4 of 5. |
+| 4 | Chunks complete, unbroken | MET | All 5 chunks from `python app.py chunks -n 5` start at a section heading and end at the end of a sentence. |
+| 5 | Answers under 3 sentences | MET | Every answer was one sentence, not counting the "Source:" line. |
 ## Diagnoses
 
 <!-- For each miss: which stage caused it, and how. The stage alone isn't
